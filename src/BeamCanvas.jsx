@@ -1,13 +1,13 @@
 import { useEffect, useRef, useState } from "react";
 import CalculationEngine from "./CalculationEngine";
 import LoadInputForm from "./LoadInputForm";
-import SupportSelector from "./SupportSelector"; // Import SupportSelector
+import SupportSelector from "./SupportSelector";
 import { Line } from "react-chartjs-2";
 import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend } from "chart.js";
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend);
 
-const BeamCanvas = ({ onResultsComputed, onAddLoad }) => {
+const BeamCanvas = () => {
   const canvasRef = useRef(null);
   const [beamLength, setBeamLength] = useState(0);
   const [shearData, setShearData] = useState(null);
@@ -18,9 +18,9 @@ const BeamCanvas = ({ onResultsComputed, onAddLoad }) => {
   useEffect(() => {
     const canvas = canvasRef.current;
     const ctx = canvas.getContext("2d");
-    
+
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-    
+
     // Draw beam
     ctx.beginPath();
     ctx.moveTo(50, 100);
@@ -48,7 +48,7 @@ const BeamCanvas = ({ onResultsComputed, onAddLoad }) => {
         ctx.strokeStyle = "red";
         ctx.lineWidth = 2;
         ctx.stroke();
-        
+
         // Arrowhead
         ctx.beginPath();
         ctx.moveTo(50 + load.position * 10 - 5, 65);
@@ -62,16 +62,18 @@ const BeamCanvas = ({ onResultsComputed, onAddLoad }) => {
 
   const handleResults = (results) => {
     if (!results) return;
-    
+
     const positions = Array.from({ length: beamLength + 1 }, (_, i) => i);
     const shearForces = positions.map((x) => results.shearForceAtX?.(x) || 0);
     const bendingMoments = positions.map((x) => results.bendingMomentAtX?.(x) || 0);
 
+    console.log("Shear Forces:", shearForces);
+    console.log("Bending Moments:", bendingMoments);
     setShearData({
       labels: positions,
       datasets: [{ label: "Shear Force (kN)", data: shearForces, borderColor: "red", fill: false }],
     });
-    
+
     setMomentData({
       labels: positions,
       datasets: [{ label: "Bending Moment (kNm)", data: bendingMoments, borderColor: "blue", fill: false }],
@@ -92,7 +94,7 @@ const BeamCanvas = ({ onResultsComputed, onAddLoad }) => {
     <div>
       <canvas ref={canvasRef} width={600} height={200} style={{ border: "1px solid #000" }} />
       <LoadInputForm onAddLoad={handleAddLoad} />
-      <SupportSelector onAddSupport={handleAddSupport} /> {/* Pass handleAddSupport as a prop */}
+      <SupportSelector onAddSupport={handleAddSupport} />
       <CalculationEngine beamLength={beamLength} supports={beamSupports} loads={loads} onResultsComputed={handleResults} />
       {shearData && <Line data={shearData} options={{ responsive: true, plugins: { legend: { position: "top" } } }} />}
       {momentData && <Line data={momentData} options={{ responsive: true, plugins: { legend: { position: "top" } } }} />}
