@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 
+
 const CalculationEngine = ({ beamLength, supports, loads, onResultsComputed }) => {
   const [results, setResults] = useState(null);
 
@@ -94,7 +95,7 @@ const CalculationEngine = ({ beamLength, supports, loads, onResultsComputed }) =
   }, [beamLength, supports, loads, onResultsComputed]);
 
   return (
-    <div>
+    <div className="calculationComponent">
       <h3>Calculation Results:</h3>
       {results ? (
         <>

@@ -4,6 +4,7 @@ import LoadInputForm from "./LoadInputForm";
 import SupportSelector from "./SupportSelector";
 import { Line } from "react-chartjs-2";
 import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend } from "chart.js";
+import "./styles/BeamCanvas.css";
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend);
 
@@ -42,22 +43,66 @@ const BeamCanvas = () => {
     // Draw loads safely
     if (loads.length > 0) {
       loads.forEach((load) => {
-        ctx.beginPath();
-        ctx.moveTo(50 + load.position * 10, 90);
-        ctx.lineTo(50 + load.position * 10, 60);
-        ctx.strokeStyle = "red";
-        ctx.lineWidth = 2;
-        ctx.stroke();
-
-        // Arrowhead
-        ctx.beginPath();
-        ctx.moveTo(50 + load.position * 10 - 5, 65);
-        ctx.lineTo(50 + load.position * 10, 60);
-        ctx.lineTo(50 + load.position * 10 + 5, 65);
-        ctx.fillStyle = "red";
-        ctx.fill();
+        console.log("Drawing load:", load);
+        const startX = 50 + load.position * 10;
+    
+        if (load.type === "point") {
+          // Draw point load with an arrow
+          ctx.beginPath();
+          ctx.moveTo(startX, 90);
+    
+          if (load.direction === "up") {
+            ctx.lineTo(startX, 60); // Arrow pointing up
+          } else if (load.direction === "down") {
+            ctx.lineTo(startX, 120); // Arrow pointing down
+          }
+    
+          ctx.strokeStyle = "red";
+          ctx.lineWidth = 2;
+          ctx.stroke();
+    
+          // Arrowhead
+          ctx.beginPath();
+          if (load.direction === "up") {
+            ctx.moveTo(startX - 5, 65);
+            ctx.lineTo(startX, 60);
+            ctx.lineTo(startX + 5, 65);
+          } else if (load.direction === "down") {
+            ctx.moveTo(startX - 5, 115);
+            ctx.lineTo(startX, 120);
+            ctx.lineTo(startX + 5, 115);
+          }
+          ctx.fillStyle = "red";
+          ctx.fill();
+    
+        } else if (load.type === "udl") {
+          // Draw UDL as a rectangle from load.start to load.end
+          const startX = 50 + load.start * 10;
+          const endX = 50 + load.end * 10;
+    
+          ctx.beginPath();
+          ctx.rect(startX, 85, endX - startX, 5); // Rectangle with small height
+          ctx.fillStyle = "red";
+          ctx.fill();
+    
+        } else if (load.type === "trapezoidal") {
+          // Draw trapezoidal load as a right-angled triangle (mirrored)
+          const startX = 50 + load.start * 10;
+          const endX = 50 + load.end * 10;
+        
+          ctx.beginPath();
+          ctx.moveTo(startX, 85); // Start point (base)
+          ctx.lineTo(endX, 70);   // Perpendicular line (height = 4) at end
+          ctx.lineTo(endX, 85);   // End point
+          ctx.closePath();
+          ctx.fillStyle = "red";
+          ctx.fill();
+        }
+        
       });
     }
+    
+    
   }, [beamLength, beamSupports, loads]);
 
   const handleResults = (results) => {
@@ -91,13 +136,20 @@ const BeamCanvas = () => {
   };
 
   return (
-    <div>
-      <canvas ref={canvasRef} width={600} height={200} style={{ border: "1px solid #000" }} />
-      <LoadInputForm onAddLoad={handleAddLoad} />
-      <SupportSelector onAddSupport={handleAddSupport} />
-      <CalculationEngine beamLength={beamLength} supports={beamSupports} loads={loads} onResultsComputed={handleResults} />
-      {shearData && <Line data={shearData} options={{ responsive: true, plugins: { legend: { position: "top" } } }} />}
-      {momentData && <Line data={momentData} options={{ responsive: true, plugins: { legend: { position: "top" } } }} />}
+    <div className="container">
+      <div className="canvas-container">
+        <h3>Beam Analysis</h3>
+        <canvas ref={canvasRef} width={600} height={200} />
+      </div>
+      <div className="controls-container">
+        <LoadInputForm onAddLoad={handleAddLoad} />
+        <SupportSelector onAddSupport={handleAddSupport} />
+        <CalculationEngine beamLength={beamLength} supports={beamSupports} loads={loads} onResultsComputed={handleResults} />
+      </div>
+      <div className="chart-container">
+        {shearData && <Line data={shearData} options={{ responsive: true, plugins: { legend: { position: "top" } } }} />}
+        {momentData && <Line data={momentData} options={{ responsive: true, plugins: { legend: { position: "top" } } }} />}
+      </div>
     </div>
   );
 };

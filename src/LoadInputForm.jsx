@@ -1,4 +1,5 @@
 import { useState } from "react";
+import './styles/LoadInputForm.css'; // Import the CSS file
 
 const LoadInputForm = ({ onAddLoad }) => {
   const [beamLength, setBeamLength] = useState(0);
@@ -77,135 +78,191 @@ const LoadInputForm = ({ onAddLoad }) => {
   };
 
   return (
-    <form onSubmit={handleSubmit}>
-      <label>
-        Beam Length:
-        <input type="number" value={beamLength} onChange={(e) => setBeamLength(e.target.value)} required />
-      </label>
+    <div className="container">
+      <form onSubmit={handleSubmit}>
+        <div className="form-row">
+          <div className="input-data">
+            <input type="number" value={beamLength} onChange={(e) => setBeamLength(e.target.value)} required />
+            <div className="underline"></div>
+            <label>Beam Length</label>
+          </div>
+          <label>
+            Load Type:
+            <select value={loadType} onChange={(e) => setLoadType(e.target.value)}>
+              <option value="point">Point Load</option>
+              <option value="moment">Bending Moment</option>
+              <option value="udl">Uniform Distributed Load (UDL)</option>
+              <option value="trapezoidal">Triangular/Trapezoidal Load</option>
+            </select>
+          </label>
+        </div>
 
-      <label>
-        Load Type:
-        <select value={loadType} onChange={(e) => setLoadType(e.target.value)}>
-          <option value="point">Point Load</option>
-          <option value="moment">Bending Moment</option>
-          <option value="udl">Uniform Distributed Load (UDL)</option>
-          <option value="trapezoidal">Triangular/Trapezoidal Load</option>
+        {loadType === "point" && (
+          <>
+            <div className="form-row">
+              <div className="input-data">
+                <input type="number" value={position} onChange={(e) => setPosition(e.target.value)} required />
+                <div className="underline"></div>
+                <label>Position</label>
+              </div>
+              <div className="input-data">
+                <input type="number" value={magnitude} onChange={(e) => setMagnitude(e.target.value)} required />
+                <div className="underline"></div>
+                <label>Magnitude</label>
+              </div>
+            </div>
+            <div className="form-row">
+              <div className="input-data">
+                <input type="number" value={angle} onChange={(e) => setAngle(e.target.value)} required />
+                <div className="underline"></div>
+                <label>Angle (°)</label>
+              </div>
+              <label>
+                Direction:
+                <select value={direction} onChange={(e) => setDirection(e.target.value)}>
+                  <option value="up">Up</option>
+                  <option value="down">Down</option>
+                </select>
+              </label>
+            </div>
+          </>
+        )}
+
+        {loadType === "moment" && (
+          <>
+            <div className="form-row">
+              <label>
+                Position:
+                <input type="number" value={position} onChange={(e) => setPosition(e.target.value)} required />
+              </label>
+              <label>
+                Magnitude:
+                <input type="number" value={magnitude} onChange={(e) => setMagnitude(e.target.value)} required />
+              </label>
+              <label>
+                Moment Direction:
+                <select value={momentDirection} onChange={(e) => setMomentDirection(e.target.value)}>
+                  <option value="clockwise">Clockwise</option>
+                  <option value="anticlockwise">Anticlockwise</option>
+                </select>
+              </label>
+            </div>
+          </>
+        )}
+
+{loadType === "udl" && (
+  <div>
+    <div className="form-row">
+      <div className="input-data">
+        <input
+          type="number"
+          value={start}
+          onChange={(e) => setStart(e.target.value)}
+          required
+        />
+        <div className="underline"></div>
+        <label>Start Position</label>
+      </div>
+      <div className="input-data">
+        <input
+          type="number"
+          value={end}
+          onChange={(e) => setEnd(e.target.value)}
+          required
+        />
+        <div className="underline"></div>
+        <label>End Position</label>
+      </div>
+    </div>
+
+    <div className="form-row">
+      <div className="input-data">
+        <input
+          type="number"
+          value={magnitude}
+          onChange={(e) => setMagnitude(e.target.value)}
+          required
+        />
+        <div className="underline"></div>
+        <label>Load Magnitude</label>
+      </div>
+      <div className="input-data">
+        
+        <select value={direction} onChange={(e) => setDirection(e.target.value)}>
+          <option value="up">Up</option>
+          <option value="down">Down</option>
         </select>
-      </label>
+        <label>Load Direction</label>
+      </div>
+    </div>
+  </div>
+)}
 
-      {loadType === "point" && (
-        <>
-          <label>
-            Position:
-            <input type="number" value={position} onChange={(e) => setPosition(e.target.value)} required />
-          </label>
-          <label>
-            Magnitude:
-            <input type="number" value={magnitude} onChange={(e) => setMagnitude(e.target.value)} required />
-          </label>
-          <label>
-            Angle (°):
-            <input type="number" value={angle} onChange={(e) => setAngle(e.target.value)} required />
-          </label>
-          <label>
-            Direction:
-            <select value={direction} onChange={(e) => setDirection(e.target.value)}>
-              <option value="up">Up</option>
-              <option value="down">Down</option>
-            </select>
-          </label>
-        </>
-      )}
 
-      {loadType === "moment" && (
-        <>
-          <label>
-            Position:
-            <input type="number" value={position} onChange={(e) => setPosition(e.target.value)} required />
-          </label>
-          <label>
-            Magnitude:
-            <input type="number" value={magnitude} onChange={(e) => setMagnitude(e.target.value)} required />
-          </label>
-          <label>
-            Moment Direction:
-            <select value={momentDirection} onChange={(e) => setMomentDirection(e.target.value)}>
-              <option value="clockwise">Clockwise</option>
-              <option value="anticlockwise">Anticlockwise</option>
-            </select>
-          </label>
-        </>
-      )}
+        {loadType === "trapezoidal" && (
+          <>
+            <div className="form-row">
+              <div className="input-data">
 
-      {loadType === "udl" && (
-        <>
-          <label>
-            Start Position:
-            <input type="number" value={start} onChange={(e) => setStart(e.target.value)} required />
-          </label>
-          <label>
-            End Position:
-            <input type="number" value={end} onChange={(e) => setEnd(e.target.value)} required />
-          </label>
-          <label>
-            Load Magnitude:
-            <input type="number" value={magnitude} onChange={(e) => setMagnitude(e.target.value)} required />
-          </label>
-          <label>
-            Load Direction:
-            <select value={direction} onChange={(e) => setDirection(e.target.value)}>
-              <option value="up">Up</option>
-              <option value="down">Down</option>
-            </select>
-          </label>
-        </>
-      )}
+              
+                <input type="number" value={start} onChange={(e) => setStart(e.target.value)} required />
+              <div className="underline"></div>
+             <label> Start Position </label>
+             </div>
+              <div className="input-data">
+              
+                <input type="number" value={end} onChange={(e) => setEnd(e.target.value)} required />
+                <div className="underline"></div>
+                <label>
+                End Position </label>
+              </div>
+              </div>
+              <div className="form-row">
+                <div className="input-data">
 
-      {loadType === "trapezoidal" && (
-        <>
-          <label>
-            Start Position:
-            <input type="number" value={start} onChange={(e) => setStart(e.target.value)} required />
-          </label>
-          <label>
-            End Position:
-            <input type="number" value={end} onChange={(e) => setEnd(e.target.value)} required />
-          </label>
-          <label>
-            Start Magnitude:
-            <input type="number" value={startMagnitude} onChange={(e) => setStartMagnitude(e.target.value)} required />
-          </label>
-          <label>
-            End Magnitude:
-            <input type="number" value={endMagnitude} onChange={(e) => setEndMagnitude(e.target.value)} required />
-          </label>
-          <label>
-            Load Direction:
-            <select value={direction} onChange={(e) => setDirection(e.target.value)}>
-              <option value="up">Up</option>
-              <option value="down">Down</option>
-            </select>
-          </label>
-        </>
-      )}
+              
+                <input type="number" value={startMagnitude} onChange={(e) => setStartMagnitude(e.target.value)} required />
+                <div className="underline"></div>
+                <label>
+                Start Magnitude </label>
+                </div>
+              <div className="input-data">
 
-      <button type="button" onClick={handleAddLoad}>Add Load</button>
-      <button type="submit">Submit Loads</button>
+                <input type="number" value={endMagnitude} onChange={(e) => setEndMagnitude(e.target.value)} required />
+                <div className="underline"></div>
+              <label>
+                End Magnitude</label>
+              
+              </div>
+              <label>
+                Load Direction:
+                <select value={direction} onChange={(e) => setDirection(e.target.value)}>
+                  <option value="up">Up</option>
+                  <option value="down">Down</option>
+                </select>
+              </label>
+            </div>
+          </>
+        )}
 
-      <h3>Added Loads:</h3>
-      <ul>
-        {loads.map((load, index) => (
-          <li key={index}>
-            {load.type.toUpperCase()} Load at {load.position ?? load.start}-{load.end ?? ""} 
-            {load.magnitude && ` | Magnitude: ${load.magnitude}`}
-            {load.startMagnitude && ` | Start Mag: ${load.startMagnitude}`}
-            {load.endMagnitude && ` | End Mag: ${load.endMagnitude}`}
-            {load.direction && ` | Direction: ${load.direction}`}
-            {load.angle && ` | Angle: ${load.angle}°`}
-          </li>
-        ))}
-      </ul>
-    </form>
+        <button className="button-50" type="button" onClick={handleAddLoad}>Add Load</button>
+        <button type="submit" className="button-50">Submit Loads</button>
+
+        <h3>Added Loads:</h3>
+        <ul>
+          {loads.map((load, index) => (
+            <li key={index}>
+              {load.type.toUpperCase()} Load at {load.position ?? load.start}-{load.end ?? ""} 
+              {load.magnitude && ` | Magnitude: ${load.magnitude}`}
+              {load.startMagnitude && ` | Start Mag: ${load.startMagnitude}`}
+              {load.endMagnitude && ` | End Mag: ${load.endMagnitude}`}
+              {load.direction && ` | Direction: ${load.direction}`}
+              {load.angle && ` | Angle: ${load.angle}°`}
+            </li>
+          ))}
+        </ul>
+      </form>
+    </div>
   );
 };
 

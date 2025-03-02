@@ -13,7 +13,8 @@ const SupportSelector = ({ onAddSupport }) => {
   };
 
   return (
-    <form onSubmit={handleSubmit}>
+    <form onSubmit={handleSubmit} className="form-container">
+      <div className="form-row">
       <label>
         Support Type:
         <select value={type} onChange={(e) => setType(e.target.value)}>
@@ -27,7 +28,9 @@ const SupportSelector = ({ onAddSupport }) => {
         Position:
         <input type="number" value={position} onChange={(e) => setPosition(e.target.value)} required />
       </label>
-      <button type="submit">Add Support</button>
+      
+      <button className="button-50" type="submit">Add Support</button>
+      </div>
     </form>
   );
 };
