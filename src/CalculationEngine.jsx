@@ -1,7 +1,56 @@
 import { useEffect, useState } from "react";
 
+
 const CalculationEngine = ({ beamLength, supports, loads, onResultsComputed }) => {
   const [results, setResults] = useState(null);
+
+  const shearForceAtX = (x) => {
+    let shear = 0;
+    if (x < supports[0].position) return 0;
+    shear += results?.Ra || 0;
+
+    loads.forEach((load) => {
+      if (load.type === "point" && load.position <= x) {
+        shear += load.magnitude * (load.direction === "up" ? -1 : 1);
+      } else if (load.type === "udl" && load.start <= x) {
+        const effectiveLength = Math.min(x, load.end) - load.start;
+        const udlForce = load.magnitude * effectiveLength;
+        shear += udlForce * (load.direction === "up" ? -1 : 1);
+      } else if (load.type === "trapezoidal" && load.start <= x) {
+        const dx = Math.min(x, load.end) - load.start;
+        const equivalentLoad = (load.startMagnitude + (load.startMagnitude + (load.endMagnitude - load.startMagnitude) * (dx / (load.end - load.start)))) * dx / 2;
+        shear += equivalentLoad * (load.direction === "up" ? -1 : 1);
+      }
+    });
+
+    return shear;
+  };
+
+  const bendingMomentAtX = (x) => {
+    let moment = 0;
+    if (x < supports[0].position) return 0;
+    moment += (results?.Ra || 0) * (x - supports[0].position);
+
+    loads.forEach((load) => {
+      if (load.type === "point" && load.position <= x) {
+        moment += load.magnitude * (load.position - x) * (load.direction === "up" ? -1 : 1);
+      } else if (load.type === "moment" && load.position <= x) {
+        moment += load.magnitude * (load.momentDirection === "clockwise" ? -1 : 1);
+      } else if (load.type === "udl" && load.start <= x) {
+        const effectiveLength = Math.min(x, load.end) - load.start;
+        const udlForce = load.magnitude * effectiveLength;
+        const centroid = load.start + effectiveLength / 2;
+        moment += udlForce * (centroid - x) * (load.direction === "up" ? -1 : 1);
+      } else if (load.type === "trapezoidal" && load.start <= x) {
+        const dx = Math.min(x, load.end) - load.start;
+        const equivalentLoad = (load.startMagnitude + (load.startMagnitude + (load.endMagnitude - load.startMagnitude) * (dx / (load.end - load.start)))) * dx / 2;
+        const centroid = load.start + dx / 2;
+        moment += equivalentLoad * (centroid - x) * (load.direction === "up" ? -1 : 1);
+      }
+    });
+
+    return moment;
+  };
 
   useEffect(() => {
     if (loads.length === 0 || supports.length < 2) return;
@@ -42,59 +91,11 @@ const CalculationEngine = ({ beamLength, supports, loads, onResultsComputed }) =
       onResultsComputed({ Ra, Rb, shearForceAtX, bendingMomentAtX });
     };
 
-    const shearForceAtX = (x) => {
-      let shear = 0;
-      if (x < supports[0].position) return 0;
-      shear += results?.Ra || 0;
-
-      loads.forEach((load) => {
-        if (load.type === "point" && load.position <= x) {
-          shear += load.magnitude * (load.direction === "up" ? -1 : 1);
-        } else if (load.type === "udl" && load.start <= x) {
-          const effectiveLength = Math.min(x, load.end) - load.start;
-          const udlForce = load.magnitude * effectiveLength;
-          shear += udlForce * (load.direction === "up" ? -1 : 1);
-        } else if (load.type === "trapezoidal" && load.start <= x) {
-          const dx = Math.min(x, load.end) - load.start;
-          const equivalentLoad = (load.startMagnitude + (load.startMagnitude + (load.endMagnitude - load.startMagnitude) * (dx / (load.end - load.start)))) * dx / 2;
-          shear += equivalentLoad * (load.direction === "up" ? -1 : 1);
-        }
-      });
-
-      return shear;
-    };
-
-    const bendingMomentAtX = (x) => {
-      let moment = 0;
-      if (x < supports[0].position) return 0;
-      moment += (results?.Ra || 0) * (x - supports[0].position);
-
-      loads.forEach((load) => {
-        if (load.type === "point" && load.position <= x) {
-          moment += load.magnitude * (load.position - x) * (load.direction === "up" ? -1 : 1);
-        } else if (load.type === "moment" && load.position <= x) {
-          moment += load.magnitude * (load.momentDirection === "clockwise" ? -1 : 1);
-        } else if (load.type === "udl" && load.start <= x) {
-          const effectiveLength = Math.min(x, load.end) - load.start;
-          const udlForce = load.magnitude * effectiveLength;
-          const centroid = load.start + effectiveLength / 2;
-          moment += udlForce * (centroid - x) * (load.direction === "up" ? -1 : 1);
-        } else if (load.type === "trapezoidal" && load.start <= x) {
-          const dx = Math.min(x, load.end) - load.start;
-          const equivalentLoad = (load.startMagnitude + (load.startMagnitude + (load.endMagnitude - load.startMagnitude) * (dx / (load.end - load.start)))) * dx / 2;
-          const centroid = load.start + dx / 2;
-          moment += equivalentLoad * (centroid - x) * (load.direction === "up" ? -1 : 1);
-        }
-      });
-
-      return moment;
-    };
-
     calculateReactions();
   }, [beamLength, supports, loads, onResultsComputed]);
 
   return (
-    <div>
+    <div className="calculationComponent">
       <h3>Calculation Results:</h3>
       {results ? (
         <>
